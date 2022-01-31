@@ -29,13 +29,46 @@ namespace Управление_версиями_1с
         {
             if (comboBox1.Text != "")
             {
-                WriteRegistry(comboBox1.Text);
+                if (!WriteRegistry(comboBox1.Text))
+                {
+                    return;
+                }
+            }
+
+            ServiceController sc = new ServiceController("1C:Enterprise 8.3 Server Agent (x86-64)");
+
+            if ((sc.Status.Equals(ServiceControllerStatus.Running)) || (sc.Status.Equals(ServiceControllerStatus.StartPending)))
+            {
+                try
+                {
+                    sc.Stop();
+                    sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(15));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
+                    return;
+                }
+            }
+
+            if ((sc.Status.Equals(ServiceControllerStatus.Stopped)) || (sc.Status.Equals(ServiceControllerStatus.StopPending)))
+            {
+                try
+                {
+                    sc.Start();
+                    sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(15));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
+                    return;
+                }
             }
 
             UpdateLabe();
         }
 
-        void WriteRegistry(string version)
+        Boolean WriteRegistry(string version)
         {
             string paramvalue = @"""C:\Program Files\1cv8\" + version + @"\bin\ragent.exe"" -srvc -agent -regport 1541 -port 1540 -range 1560:1591 -d ""C:\Program Files\1cv8\srvinfo"" -debug";
 
@@ -52,7 +85,11 @@ namespace Управление_версиями_1с
             catch (Exception ex)
             {
                 MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
+
+                return false;
             }
+
+            return true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -107,43 +144,6 @@ namespace Управление_версиями_1с
 
         private void button2_Click(object sender, EventArgs e)
         {
-            UpdateLabe();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            ServiceController sc = new ServiceController("1C:Enterprise 8.3 Server Agent (x86-64)");
-            if ((sc.Status.Equals(ServiceControllerStatus.Stopped)) || (sc.Status.Equals(ServiceControllerStatus.StopPending)))
-            {
-                try
-                {
-                    sc.Start();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
-                }
-            }
-
-            UpdateLabe();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            ServiceController sc = new ServiceController("1C:Enterprise 8.3 Server Agent (x86-64)");
-
-            if ((sc.Status.Equals(ServiceControllerStatus.Running)) || (sc.Status.Equals(ServiceControllerStatus.StartPending)))
-            {
-                try
-                {
-                    sc.Stop();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
-                }
-            }
-
             UpdateLabe();
         }
     }
