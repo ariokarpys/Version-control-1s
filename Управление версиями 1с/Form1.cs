@@ -94,7 +94,26 @@ namespace Управление_версиями_1с
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            OpenFileList();
+            if (System.IO.Directory.Exists("C:\\Program Files\\1cv8"))
+            {
+                try
+                {
+                    foreach (string folder in System.IO.Directory.GetDirectories("C:\\Program Files\\1cv8"))
+                    {
+                        System.IO.DirectoryInfo dirInfoRoaming = new System.IO.DirectoryInfo(folder);
+                        if (dirInfoRoaming.Name.Length == 11)
+                        {
+                            comboBox1.Items.Add(dirInfoRoaming.Name);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(DateTime.Now + " Ошибка: [" + ex.Message + "]\r\n");
+                }
+            }              
+
+            //OpenFileList();
 
             UpdateLabe();
         }
